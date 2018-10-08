@@ -1,3 +1,5 @@
+# title: Dark Aisle: A Retail Roguelike
+# author: Nick Bush
 // A narrative mini-roguelike written in Ink, meant to be played in Inky.
 
 -> start
@@ -71,15 +73,15 @@
 // LIST_RANGE because you can't use list(x) notation in a function
 ~ temp z = x_val+1
 {
-    - y_val == 0 && list1 has LIST_RANGE(list1, z, z):
+    - y_val == 0 && list1 has LIST_RANGE(LIST_ALL(list1), z, z):
         ~ return true
-    - y_val == 1 && list2 has LIST_RANGE(list2, z, z): 
+    - y_val == 1 && list2 has LIST_RANGE(LIST_ALL(list2), z, z): 
         ~ return true
-    - y_val == 2 && list3 has LIST_RANGE(list3, z, z): 
+    - y_val == 2 && list3 has LIST_RANGE(LIST_ALL(list3), z, z): 
         ~ return true
-    - y_val == 3 && list4 has LIST_RANGE(list4, z, z): 
+    - y_val == 3 && list4 has LIST_RANGE(LIST_ALL(list4), z, z): 
         ~ return true
-    - y_val == 4 && list5 has LIST_RANGE(list5, z, z): 
+    - y_val == 4 && list5 has LIST_RANGE(LIST_ALL(list5), z, z): 
         ~ return true
     - else:
         ~ return false
@@ -91,11 +93,11 @@
     - 
         // adding element to list
         {
-            - y_var == 0: ~ list1 += LIST_RANGE(list1, z, z)
-            - y_var == 1: ~ list2 += LIST_RANGE(list2, z, z)
-            - y_var == 2: ~ list3 += LIST_RANGE(list3, z, z)
-            - y_var == 3: ~ list4 += LIST_RANGE(list4, z, z)
-            - y_var == 4: ~ list5 += LIST_RANGE(list5, z, z)
+            - y_var == 0: ~ list1 += LIST_RANGE(LIST_ALL(list1), z, z)
+            - y_var == 1: ~ list2 += LIST_RANGE(LIST_ALL(list2), z, z)
+            - y_var == 2: ~ list3 += LIST_RANGE(LIST_ALL(list3), z, z)
+            - y_var == 3: ~ list4 += LIST_RANGE(LIST_ALL(list4), z, z)
+            - y_var == 4: ~ list5 += LIST_RANGE(LIST_ALL(list5), z, z)
         }
     - else: 
         // removing element from list
@@ -109,7 +111,7 @@
 }
 
 === function get_floor_type
-~ temp chosen_floor = LIST_RANDOM(floor_types)
+~ temp chosen_floor = LIST_RANDOM_OLD(floor_types)
 ~ floor_types -= chosen_floor
 ~ return chosen_floor
 
@@ -120,12 +122,13 @@ You <>
         lose {change * -1} <>
     - change > 0:
         gain {change} <> 
-}
+} <>
 energy.
 ~ energy += change
 
+TODO remove?
 // stolen Inkle functions
-=== function LIST_RANDOM(list) 
+=== function LIST_RANDOM_OLD(list) 
     { list:
         ~ return getNth(list, RANDOM(1, LIST_COUNT(list)))
     - else:
@@ -352,6 +355,7 @@ TODO debug
 ->->
 
 = restart
+# RESTART
 In Inky, you'll need to use the "Restart story" button on the top right. Click it now!
 -> END
 
@@ -386,13 +390,13 @@ In Inky, you'll need to use the "Restart story" button on the top right. Click i
     - (move_success)
     // lose energy for moving
     ~ energy--
-    {energy < 1: -> dead.energy}
+    {energy < 1: -> dead.out_of_energy}
     -> stairs
     
     - (stairs)
     // check stairs collision if already identified
     { xpos == stairs_x && ypos == stairs_y:
-        -> stair_text.return -> game.find_stairs.choices
+        -> stair_text.return_to_stairs -> game.find_stairs.choices
     }
     -> item
 
@@ -441,8 +445,6 @@ In Inky, you'll need to use the "Restart story" button on the top right. Click i
 /* TEXT */
 
 === start
-The Dark Aisle: A Retail Roguelike
-
 The sliding doors glide shut for the final time and you slide the vertical deadbolt shut to seal it for the night. 
 Cost Company's main entrance is at the lowest level of Dungeon Mall, one of the biggest shopping centres in the country. Although the store is fully five stories, you are the only clerk on duty. You must complete a full sweep of the store and exit through the secondary entrance on the top floor.
 As usual, you expect to find spills and lost children. It's the same every night. And since you're only human, you don't have infinite energy for this unpaid overtime. Let's hope you make it home.
@@ -485,7 +487,7 @@ Your feet drag. You won't be able to go much further.
     - You take one long stride to minimize steps and extend the longevity of the tread of your expensive work shoes.
     - The electric hum of the lights amplify briefly in the darkness.
     - You catch your diffused reflection in a glass display.
-    - The sound of an aging camera survomotor whizzes somewhere on the ceiling.
+    - The sound of an aging camera servomotor whizzes somewhere on the ceiling.
     - {LIST_COUNT(children_found) > 0: You feel reassured by the sound of gentle footsteps behind you.}
 }
 ->->
@@ -500,7 +502,7 @@ Your feet drag. You won't be able to go much further.
 - (spill)
 {not spills_found: -> child}
 {event_pennies && event_broadbeans && event_rivets && event_chili && event_gatorade: ->->}
-~ temp ran_spill = LIST_RANDOM(spills_found)
+~ temp ran_spill = LIST_RANDOM_OLD(spills_found)
 {ran_spill:
     - spills_found(1): 
         {event_pennies: -> spill}
@@ -540,7 +542,7 @@ Your feet drag. You won't be able to go much further.
 - (child)
 {not children_found: ->->}
 {event_orville && event_yulia && event_diego && event_sanri && event_kenneth: ->->}
-~ temp ran_child = LIST_RANDOM(children_found)
+~ temp ran_child = LIST_RANDOM_OLD(children_found)
 {ran_child:
     - children_found(1): 
         {event_orville: -> child}
@@ -737,7 +739,7 @@ a spill! <>
 - (found_chili)
     ~ spills_found += chili
     The smell of cumin fills the air. Someone tried to open a can of chili and it spilled all over the floor. They even left the can opener.
-    You clean it up, but lacking proper detergent a greasy ring is left on the floor. As you step back you can't help but notice the almost perfect circle formed by the chili spill.
+    You clean it up, but lacking proper detergent a greasy ring remains. As you step back you can't help but notice the nearly perfect circle formed by the chili spill.
     {energy_change(-2)}
 ->->
 
@@ -768,7 +770,7 @@ a lost child! You approach with <>
 {energy > 10: 
     {& an empathetic| an earnest| a cautious| a friendly} <> 
 - else: {& a tired| an exhausted} <>
-} look on your face.
+}<> look on your face.
 { floor_type:
     - floor_types(1):
         {~ 
@@ -912,7 +914,7 @@ Kenneth gets in line and you continue on.
 ->->
 
 === stair_text
-= return
+= return_to_stairs
 You return to the stairs.
 ->->
 
@@ -926,7 +928,7 @@ You return to the stairs.
 
 === dead 
 
-= energy
+= out_of_energy
 You've had enough. You fall asleep in the dark aisle of <>
 { floor_type:
     - floor_types(1): {floor_type}.
@@ -939,7 +941,7 @@ You've had enough. You fall asleep in the dark aisle of <>
 You don't know if {listWithCommas(children_found,"error")} will be there when you wake up, but there's nothing more you can do.
 }
 { spills_found:
-The last thing you remember is the smell of {LIST_RANDOM(spills_found)}.
+The last thing you remember is the smell of {LIST_RANDOM_OLD(spills_found)}.
 }
 + [Try again.]
 -> game.restart
@@ -977,7 +979,7 @@ The fresh air of the open street greets you as you exit Cost Company and Dungeon
     - else:
         You are still followed by {listWithCommas(children_found,"error")}, who look longingly into the darkness. <>
 }
-On schedule, Officer Madeline approaches. You can't help but notice {LIST_RANDOM(children_found)} grimace at the thought of riding in the cruiser again. Poor kid. You offer a tired smile and wave goodbye.
+On schedule, Officer Madeline approaches. You can't help but notice {LIST_RANDOM_OLD(children_found)} grimace at the thought of riding in the cruiser again. Poor kid. You offer a tired smile and wave goodbye.
 
     Finally alone, you breathe a sigh of relief. <>
 - (spills)
@@ -996,4 +998,5 @@ But you can finally go home.
 {not all_found:
 Something, however, bothers you. Officer Madeline's cruiser sticks out unpleasantly in your mind. Maybe you missed something? 
 }
--> END
+* [Try again?]
+    -> game.restart
